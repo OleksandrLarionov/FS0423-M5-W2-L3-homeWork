@@ -1,5 +1,6 @@
 package larionov.API.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +21,11 @@ public class BlogPost {
     private String contenuto;
     private double tempoDiLettura;
 
+
     @ManyToOne
 
     @JoinColumn(name = "author_id")
+    @JsonBackReference
     private Author author;
+
 }
