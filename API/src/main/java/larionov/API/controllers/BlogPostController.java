@@ -1,4 +1,5 @@
 package larionov.API.controllers;
+import larionov.API.entities.Author;
 import larionov.API.entities.BlogPost;
 import larionov.API.services.BlogPostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,10 @@ public class BlogPostController {
     }
 
     @PutMapping("/{id}")
-    public BlogPost findByIdAndUpdate(@PathVariable Long id, @RequestBody BlogPost body) {
-        return blogPostService.findByIdAndUpdate(id, body);
+    public BlogPost findByIdAndUpdate(@PathVariable Long id,
+                                      @RequestBody BlogPost body,
+                                      @RequestBody Author author) {
+        return blogPostService.findByIdAndUpdate(id, body, author);
     }
 
     @DeleteMapping("/{id}")

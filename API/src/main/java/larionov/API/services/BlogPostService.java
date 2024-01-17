@@ -2,7 +2,11 @@ package larionov.API.services;
 
 import larionov.API.entities.Author;
 import larionov.API.entities.BlogPost;
+import larionov.API.exceptions.NotFoundException;
+import larionov.API.repositories.AuthorDAO;
+import larionov.API.repositories.BlogPostsDAO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -11,54 +15,41 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class BlogPostService {
-
-
-    private List<BlogPost> blogPost = new ArrayList<>();
+    @Autowired
+    private BlogPostsDAO blogPostDao;
+    @Autowired
+    private AuthorDAO authorDAO;
 
     public List<BlogPost> getBlogPosts() {
-        return this.blogPost;
+        return blogPostDao.findAll();
     }
 
     public BlogPost saveBlogPost(BlogPost body) {
-        Random rndm = new Random();
-        body.setId(rndm.nextLong(1, 20000));
-        this.blogPost.add(body);
-        return body;
+
+        return blogPostDao.save(body);
     }
 
     public BlogPost findById(Long id) {
-        return blogPost.stream()
-                .filter(blog -> blog.getId().equals(id))
-                .findFirst()
-                .orElseGet(() -> {
-                    log.info("per la peppa");
-                    return null;
-                });
+        return blogPostDao.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
     public void delete(Long id) {
-        blogPost.removeIf(blog -> blog.getId().equals(id));
+        BlogPost found = this.findById(id);
+        blogPostDao.delete(found);
     }
 
-    public BlogPost findByIdAndUpdate(Long id, BlogPost body) {
-        Optional<BlogPost> blogPostOptional = this.blogPost.stream()
-                .filter(blogPost -> blogPost.getId().equals(id))
-                .findFirst();
+    public BlogPost findByIdAndUpdate(Long id, BlogPost body, Author author) {
+        BlogPost found = this.findById(id);
+        found.setId(id);
+        found.setCategoria(body.getCategoria());
+        found.setTitolo(body.getTitolo());
+        found.setAuthor(body.getAuthor());
+        return found;
 
-        if (blogPostOptional.isPresent()) {
-            BlogPost found = blogPostOptional.get();
-            found.setId(id);
-            found.setCategoria(body.getCategoria());
-            found.setTitolo(body.getTitolo());
-            return found;
-        } else {
-            log.info("error");
-            return null;
-        }
     }
 
     public List<BlogPost> filterByCategory(String categoria) {
-        List<BlogPost> categoryList = this.blogPost.stream()
+        List<BlogPost> categoryList = this.getBlogPosts().stream()
                 .filter(blogPost -> blogPost.getCategoria().equals(categoria))
                 .collect(Collectors.toList());
 
